@@ -1,6 +1,6 @@
 {
   "name": "precision-big-math",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "A library for high-precision mathematical operations with large numbers",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

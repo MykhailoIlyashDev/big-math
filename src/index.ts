@@ -276,24 +276,27 @@ export class BigMath {
   static gcd(a: string | number, b: string | number): string {
     try {
       // Configure Big.js for very large numbers
-      this.configure();
-      
-      let bigA = new Big(a).abs();
-      let bigB = new Big(b).abs();
-      
-      // Check if both numbers are integers
-      if (!this.isInteger(bigA) || !this.isInteger(bigB)) {
-        throw new Error('GCD is defined only for integers');
-      }
-      
-      // Euclidean algorithm
-      while (!bigB.eq(0)) {
-        const temp = new Big(bigB);
-        bigB = bigA.mod(bigB);
-        bigA = temp;
-      }
-      
-      return bigA.toFixed();
+        this.configure();
+        
+        let strA = a.toString();
+        let strB = b.toString();
+        
+        if (strA.startsWith('-')) strA = strA.substring(1);
+        if (strB.startsWith('-')) strB = strB.substring(1);
+        
+        if (strA.includes('.')) strA = strA.substring(0, strA.indexOf('.'));
+        if (strB.includes('.')) strB = strB.substring(0, strB.indexOf('.'));
+        
+        while (strB !== '0') {
+            const bigA = new Big(strA);
+            const bigB = new Big(strB);
+            const remainder = bigA.mod(bigB).toFixed();
+            
+            strA = strB;
+            strB = remainder;
+        }
+        
+        return strA;
     } catch (error) {
       throw new Error(`GCD error: ${error instanceof Error ? error.message : String(error)}`);
     }
@@ -310,22 +313,25 @@ static lcm(a: string | number, b: string | number): string {
       // Configure Big.js for very large numbers
       this.configure();
       
-      const bigA = new Big(a).abs();
-      const bigB = new Big(b).abs();
-      
-      // Check if both numbers are integers
-      if (!this.isInteger(bigA) || !this.isInteger(bigB)) {
-        throw new Error('LCM is defined only for integers');
-      }
-      
-      if (bigA.eq(0) || bigB.eq(0)) {
-        return '0';
-      }
-      
-      const gcd = new Big(this.gcd(a, b));
-      const lcm = bigA.times(bigB).div(gcd);
-      
-      return lcm.toFixed();
+    let strA = a.toString();
+    let strB = b.toString();
+    
+    if (strA.startsWith('-')) strA = strA.substring(1);
+    if (strB.startsWith('-')) strB = strB.substring(1);
+    
+    if (strA.includes('.')) strA = strA.substring(0, strA.indexOf('.'));
+    if (strB.includes('.')) strB = strB.substring(0, strB.indexOf('.'));
+    
+    if (strA === '0' || strB === '0') {
+      return '0';
+    }
+    
+    const gcd = this.gcd(strA, strB);
+    
+    const product = new Big(strA).times(strB).toFixed();
+    const lcm = new Big(product).div(gcd).toFixed();
+    
+    return lcm;
   } catch (error) {
     throw new Error(`LCM error: ${error instanceof Error ? error.message : String(error)}`);
   }
