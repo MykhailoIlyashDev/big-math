@@ -1,10 +1,10 @@
-# big-math
+# precision-big-math
 BigMath is a high-precision mathematical library for handling large numbers (16+ digits) with accurate arithmetic operations including addition, multiplication, division, exponentiation, square roots, and more.
 
 ## Installation
 
 ```bash
-npm install big-math
+npm install precision-big-math
 ```
 
 ## Features
@@ -19,9 +19,9 @@ npm install big-math
 ## Usage
 
 ```javascript
-const { BigMath } = require('big-math');
+const { BigMath } = require('precision-big-math');
 // or
-import { BigMath } from 'big-math';
+import { BigMath } from 'precision-big-math';
 ```
 
 ### Basic Operations
