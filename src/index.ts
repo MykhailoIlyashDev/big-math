@@ -15,8 +15,13 @@ static add(a: string | number, b: string | number): string {
   try {
     const bigA = new Big(a);
     const bigB = new Big(b);
-    // Використовуємо toFixed(0) для уникнення наукової нотації для дуже великих чисел
-    return bigA.plus(bigB).toFixed(0);
+    const result = bigA.plus(bigB);
+    
+    if (result.toString().includes('.')) {
+      return result.toString();
+    } else {
+      return result.toFixed(0);
+    }
   } catch (error) {
     throw new Error(`Addition error: ${error instanceof Error ? error.message : String(error)}`);
   }
@@ -186,36 +191,20 @@ static sqrt(value: string | number, decimalPlaces: number = 20): string {
    */
 static gcd(a: string | number, b: string | number): string {
   try {
-    // Перетворюємо вхідні дані в рядки для роботи з дуже великими числами
-    let numA = a.toString();
-    let numB = b.toString();
+    let bigA = new Big(a).abs();
+    let bigB = new Big(b).abs();
     
-    // Видаляємо знаки мінус, якщо вони є
-    if (numA.startsWith('-')) numA = numA.substring(1);
-    if (numB.startsWith('-')) numB = numB.substring(1);
-    
-    // Видаляємо десяткові точки та нулі після них
-    if (numA.includes('.')) {
-      const parts = numA.split('.');
-      numA = parts[0] + parts[1].replace(/0+$/, '');
-    }
-    if (numB.includes('.')) {
-      const parts = numB.split('.');
-      numB = parts[0] + parts[1].replace(/0+$/, '');
+    if (!this.isInteger(bigA) || !this.isInteger(bigB)) {
+      throw new Error('GCD is defined only for integers');
     }
     
-    // Реалізація алгоритму Евкліда для дуже великих чисел
-    while (numB !== '0') {
-      // Обчислюємо залишок від ділення numA на numB
-      const bigA = new Big(numA);
-      const bigB = new Big(numB);
-      const remainder = bigA.mod(bigB).toFixed(0);
-      
-      numA = numB;
-      numB = remainder;
+    while (!bigB.eq(0)) {
+      const temp = new Big(bigB);
+      bigB = bigA.mod(bigB);
+      bigA = temp;
     }
     
-    return numA;
+    return bigA.toFixed(0);
   } catch (error) {
     throw new Error(`GCD error: ${error instanceof Error ? error.message : String(error)}`);
   }
@@ -229,20 +218,19 @@ static gcd(a: string | number, b: string | number): string {
    */
 static lcm(a: string | number, b: string | number): string {
   try {
-    // Перетворюємо вхідні дані в рядки для роботи з дуже великими числами
-    const numA = a.toString();
-    const numB = b.toString();
+    const bigA = new Big(a).abs();
+    const bigB = new Big(b).abs();
     
-    // Перевіряємо на нуль
-    if (numA === '0' || numB === '0') {
+    if (!this.isInteger(bigA) || !this.isInteger(bigB)) {
+      throw new Error('LCM is defined only for integers');
+    }
+    
+    if (bigA.eq(0) || bigB.eq(0)) {
       return '0';
     }
     
-    // Обчислюємо НСД
-    const gcd = this.gcd(numA, numB);
-    
-    // Обчислюємо НСК за формулою: НСК(a,b) = |a*b|/НСД(a,b)
-    const product = new Big(numA).abs().times(new Big(numB).abs()).toFixed(0);
+    const gcd = this.gcd(a, b);
+    const product = bigA.times(bigB).toFixed(0);
     const lcm = new Big(product).div(new Big(gcd)).toFixed(0);
     
     return lcm;
