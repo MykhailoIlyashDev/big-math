@@ -43,15 +43,16 @@ export class BigMath {
    * @param b Second number (string or number)
    * @returns Result of multiplication as string
    */
-  static multiply(a: string | number, b: string | number): string {
-    try {
-      const bigA = new Big(a);
-      const bigB = new Big(b);
-      return bigA.times(bigB).toString();
-    } catch (error) {
-      throw new Error(`Multiplication error: ${error instanceof Error ? error.message : String(error)}`);
+    static multiply(a: string | number, b: string | number): string {
+        try {
+            const bigA = new Big(a);
+            const bigB = new Big(b);
+            // Використовуємо toFixed(0) замість toString() для уникнення наукової нотації
+            return bigA.times(bigB).toFixed(0);
+        } catch (error) {
+            throw new Error(`Multiplication error: ${error instanceof Error ? error.message : String(error)}`);
+        }
     }
-  }
 
   /**
    * Divides two large numbers with arbitrary precision
@@ -60,31 +61,26 @@ export class BigMath {
    * @param decimalPlaces Number of decimal places (default 20)
    * @returns Result of division as string
    */
-  static divide(a: string | number, b: string | number, decimalPlaces: number = 20): string {
-    try {
-      if (String(b) === '0') {
-        throw new Error('Division by zero');
-      }
-      
-      const bigA = new Big(a);
-      const bigB = new Big(b);
-      
-      // Save current DP value
-      const currentDP = Big.DP;
-      
-      // Set new DP value
-      Big.DP = decimalPlaces;
-      
-      const result = bigA.div(bigB).toString();
-      
-      // Restore previous DP value
-      Big.DP = currentDP;
-      
-      return result;
-    } catch (error) {
-      throw new Error(`Division error: ${error instanceof Error ? error.message : String(error)}`);
+    static divide(a: string | number, b: string | number, decimalPlaces: number = 20): string {
+        try {
+            if (String(b) === '0') {
+                throw new Error('Division by zero');
+            }
+            const bigA = new Big(a);
+            const bigB = new Big(b);
+            // Зберігаємо поточне значення DP
+            const currentDP = Big.DP;
+            // Встановлюємо нове значення DP
+            Big.DP = decimalPlaces;
+            // Використовуємо toFixed для забезпечення правильної кількості десяткових знаків
+            const result = bigA.div(bigB).toFixed(decimalPlaces);
+            // Відновлюємо попереднє значення DP
+            Big.DP = currentDP;
+            return result;
+        } catch (error) {
+            throw new Error(`Division error: ${error instanceof Error ? error.message : String(error)}`);
+        }
     }
-  }
 
   /**
    * Raises a number to the power of an integer exponent
@@ -92,27 +88,24 @@ export class BigMath {
    * @param exponent Integer exponent
    * @returns Result of exponentiation as string
    */
-  static pow(base: string | number, exponent: number): string {
-    try {
-      if (!Number.isInteger(exponent)) {
-        throw new Error('Exponent must be an integer');
-      }
-      
-      const bigBase = new Big(base);
-      
-      if (exponent === 0) {
-        return '1';
-      }
-      
-      if (exponent < 0) {
-        return new Big(1).div(bigBase.pow(-exponent)).toString();
-      }
-      
-      return bigBase.pow(exponent).toString();
-    } catch (error) {
-      throw new Error(`Power error: ${error instanceof Error ? error.message : String(error)}`);
+    static pow(base: string | number, exponent: number): string {
+        try {
+            if (!Number.isInteger(exponent)) {
+                throw new Error('Exponent must be an integer');
+            }
+            const bigBase = new Big(base);
+            if (exponent === 0) {
+                return '1';
+            }
+            if (exponent < 0) {
+                return new Big(1).div(bigBase.pow(-exponent)).toFixed(0);
+            }
+            // Використовуємо toFixed(0) для уникнення наукової нотації
+            return bigBase.pow(exponent).toFixed(0);
+        } catch (error) {
+            throw new Error(`Power error: ${error instanceof Error ? error.message : String(error)}`);
+        }
     }
-  }
 
   /**
    * Calculates the square root of a number
@@ -120,45 +113,42 @@ export class BigMath {
    * @param decimalPlaces Number of decimal places (default 20)
    * @returns Square root as string
    */
-  static sqrt(value: string | number, decimalPlaces: number = 20): string {
-    try {
-      const bigValue = new Big(value);
-      
-      if (bigValue.lt(0)) {
-        throw new Error('Cannot calculate square root of negative number');
-      }
-      
-      if (bigValue.eq(0)) {
-        return '0';
-      }
-      
-      // Save current DP value
-      const currentDP = Big.DP;
-      
-      // Set new DP value with extra precision for intermediate calculations
-      Big.DP = decimalPlaces + 5;
-      
-      // Newton's method for square root calculation
-      let x = new Big(value); // Initial approximation
-      let xPrev = new Big(0);
-      
-      // Iterate until desired precision is reached
-      while (x.minus(xPrev).abs().gt(new Big(10).pow(-decimalPlaces))) {
-        xPrev = x;
-        x = x.plus(new Big(value).div(x)).div(2);
-      }
-      
-      // Round to required decimal places
-      const result = x.round(decimalPlaces).toString();
-      
-      // Restore previous DP value
-      Big.DP = currentDP;
-      
-      return result;
-    } catch (error) {
-      throw new Error(`Square root error: ${error instanceof Error ? error.message : String(error)}`);
+static sqrt(value: string | number, decimalPlaces: number = 20): string {
+  try {
+    const bigValue = new Big(value);
+    if (bigValue.lt(0)) {
+      throw new Error('Cannot calculate square root of negative number');
     }
+    if (bigValue.eq(0)) {
+      return '0';
+    }
+    // Зберігаємо поточне значення DP
+    const currentDP = Big.DP;
+    // Встановлюємо нове значення DP з додатковою точністю для проміжних обчислень
+    Big.DP = decimalPlaces + 5;
+    
+    // Метод Ньютона для обчислення квадратного кореня
+    let x = new Big(value); // Початкове наближення
+    let xPrev = new Big(0);
+    
+    // Ітеруємо до досягнення бажаної точності
+    while (x.minus(xPrev).abs().gt(new Big(10).pow(-decimalPlaces))) {
+      xPrev = x;
+      x = x.plus(new Big(value).div(x)).div(2);
+    }
+    
+    // Округлюємо до потрібної кількості десяткових знаків
+    // Використовуємо toFixed для забезпечення правильної кількості десяткових знаків
+    const result = x.toFixed(decimalPlaces);
+    
+    // Відновлюємо попереднє значення DP
+    Big.DP = currentDP;
+    
+    return result;
+  } catch (error) {
+    throw new Error(`Square root error: ${error instanceof Error ? error.message : String(error)}`);
   }
+}
 
   /**
    * Calculates the factorial of a non-negative integer
@@ -193,28 +183,29 @@ export class BigMath {
    * @param b Second integer (string or number)
    * @returns GCD as string
    */
-  static gcd(a: string | number, b: string | number): string {
-    try {
-      let bigA = new Big(a).abs();
-      let bigB = new Big(b).abs();
-      
-      // Check if both numbers are integers
-      if (!this.isInteger(bigA) || !this.isInteger(bigB)) {
-        throw new Error('GCD is defined only for integers');
-      }
-      
-      // Euclidean algorithm
-      while (!bigB.eq(0)) {
-        const temp = bigB;
-        bigB = bigA.mod(bigB);
-        bigA = temp;
-      }
-      
-      return bigA.toString();
-    } catch (error) {
-      throw new Error(`GCD error: ${error instanceof Error ? error.message : String(error)}`);
+static gcd(a: string | number, b: string | number): string {
+  try {
+    let bigA = new Big(a).abs();
+    let bigB = new Big(b).abs();
+    
+    // Перевіряємо, чи обидва числа є цілими
+    if (!this.isInteger(bigA) || !this.isInteger(bigB)) {
+      throw new Error('GCD is defined only for integers');
     }
+    
+    // Алгоритм Евкліда
+    while (!bigB.eq(0)) {
+      const temp = bigB;
+      bigB = bigA.mod(bigB);
+      bigA = temp;
+    }
+    
+    // Використовуємо toFixed(0) для уникнення наукової нотації
+    return bigA.toFixed(0);
+  } catch (error) {
+    throw new Error(`GCD error: ${error instanceof Error ? error.message : String(error)}`);
   }
+}
 
   /**
    * Calculates the least common multiple (LCM) of two integers
@@ -222,26 +213,27 @@ export class BigMath {
    * @param b Second integer (string or number)
    * @returns LCM as string
    */
-  static lcm(a: string | number, b: string | number): string {
-    try {
-      const bigA = new Big(a).abs();
-      const bigB = new Big(b).abs();
-      
-      // Check if both numbers are integers
-      if (!this.isInteger(bigA) || !this.isInteger(bigB)) {
-        throw new Error('LCM is defined only for integers');
-      }
-      
-      if (bigA.eq(0) || bigB.eq(0)) {
-        return '0';
-      }
-      
-      const gcd = new Big(this.gcd(a, b));
-      return bigA.times(bigB).div(gcd).toString();
-    } catch (error) {
-      throw new Error(`LCM error: ${error instanceof Error ? error.message : String(error)}`);
+static lcm(a: string | number, b: string | number): string {
+  try {
+    const bigA = new Big(a).abs();
+    const bigB = new Big(b).abs();
+    
+    // Перевіряємо, чи обидва числа є цілими
+    if (!this.isInteger(bigA) || !this.isInteger(bigB)) {
+      throw new Error('LCM is defined only for integers');
     }
+    
+    if (bigA.eq(0) || bigB.eq(0)) {
+      return '0';
+    }
+    
+    const gcd = new Big(this.gcd(a, b));
+    // Використовуємо toFixed(0) для уникнення наукової нотації
+    return bigA.times(bigB).div(gcd).toFixed(0);
+  } catch (error) {
+    throw new Error(`LCM error: ${error instanceof Error ? error.message : String(error)}`);
   }
+}
 
   /**
    * Checks if a number is an integer
