@@ -66,6 +66,10 @@ console.log(gcd); // '3'
 // Least Common Multiple
 const lcm = BigMath.lcm('12345678901234567890', '98765432109876543210');
 console.log(lcm); // '405349064020168389956139452109876543210'
+
+BigMath.configureBigJs(1000);
+const sum = BigMath.add('9'.repeat(1000), '9'.repeat(1000)); // add 2 bignumbers
+console.log(sum);
 ```
 
 ### Comparison and Utility Functions
